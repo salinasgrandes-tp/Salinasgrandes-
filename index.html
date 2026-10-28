@@ -248,7 +248,8 @@ $("reg").addEventListener("submit", async function(ev){
   if(BASE){
     try{
       var r = await fetch(BASE + "/registros/" + clave(n,a) + ".json", {method:"PUT",
-        body: JSON.stringify({nombre:n, apellido:a, fecha:new Date().toISOString()})});
+        body: JSON.stringify({nombre:n, apellido:a, fecha:new Date().toISOString(),
+          hora:new Date().toLocaleString("es-AR",{timeZone:"America/Argentina/Buenos_Aires",day:"2-digit",month:"2-digit",year:"numeric",hour:"2-digit",minute:"2-digit",second:"2-digit",hour12:false})})});
       if(!r.ok) throw new Error("código " + r.status);
     }catch(e){
       setErr("No se pudo guardar tu registro (" + (e && e.message ? e.message : "sin conexión") + "). Revisá tu conexión y probá de nuevo.");
