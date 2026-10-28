@@ -1,0 +1,324 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Encuesta Salinas Grandes</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,700&family=Source+Sans+3:wght@400;600&display=swap">
+<style>
+/* Concepto: una columna de lectura con secciones; cada pregunta es un desplegable que muestra su respuesta al hacer clic. Blanco azulado del salar y azul del cielo de la Puna. */
+:root{
+  --bad:#a3322a;
+  --bg:#f3f6f8; --surface:#ffffff; --fg:#14212b; --muted:#5a6b78; --line:#d5dee5;
+  --accent:#1f4e79; --accent-fg:#ffffff; --accent-soft:#e3edf6;
+  --f-display:"Bricolage Grotesque","Trebuchet MS",sans-serif;
+  --f-body:"Source Sans 3","Segoe UI",system-ui,sans-serif;
+}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
+  --bg:#0e171e; --surface:#16222c; --fg:#e6edf2; --muted:#93a5b3; --line:#2a3b48;
+  --accent:#8fbbe6; --accent-fg:#0e171e; --accent-soft:#1c3144; --bad:#f0948b; color-scheme:dark}}
+:root[data-theme="dark"]{
+  --bg:#0e171e; --surface:#16222c; --fg:#e6edf2; --muted:#93a5b3; --line:#2a3b48;
+  --accent:#8fbbe6; --accent-fg:#0e171e; --accent-soft:#1c3144; --bad:#f0948b; color-scheme:dark}
+*{box-sizing:border-box}
+body{margin:0}
+[hidden]{display:none!important}
+body{background:var(--bg);color:var(--fg);font-family:var(--f-body);font-size:17px;line-height:1.6;
+  padding-block:32px 56px;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
+main{max-width:720px;margin:0 auto;display:flex;flex-direction:column;gap:32px;min-width:0}
+h1,h2{font-family:var(--f-display);line-height:1.15;margin:0;text-wrap:balance}
+h1{font-size:clamp(1.9rem,6vw,2.7rem);font-weight:700}
+h2{font-size:1.2rem;font-weight:700;color:var(--accent)}
+p{margin:0}
+.head{display:flex;flex-direction:column;gap:12px}
+.eyebrow{font-size:.78rem;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);font-weight:600}
+.muted{color:var(--muted)}
+.tools{display:flex;gap:10px;flex-wrap:wrap}
+.btn{font:inherit;font-size:.95rem;font-weight:600;background:transparent;color:var(--accent);border:1.5px solid var(--accent);border-radius:8px;padding:8px 14px;cursor:pointer}
+.btn:hover{background:var(--accent-soft)}
+.btn:focus-visible,summary:focus-visible{outline:3px solid var(--accent);outline-offset:2px}
+section{display:flex;flex-direction:column;gap:10px}
+.list{display:flex;flex-direction:column;border:1px solid var(--line);border-radius:10px;background:var(--surface);overflow:hidden}
+details{border-top:1px solid var(--line)}
+details:first-child{border-top:0}
+summary{list-style:none;cursor:pointer;padding:16px 18px;display:flex;gap:14px;align-items:flex-start;justify-content:space-between;font-weight:600}
+summary::-webkit-details-marker{display:none}
+summary:hover{background:var(--accent-soft)}
+summary .t{min-width:0}
+summary .ic{flex:none;width:22px;height:22px;margin-top:2px;position:relative;color:var(--accent)}
+summary .ic::before,summary .ic::after{content:"";position:absolute;left:50%;top:50%;width:12px;height:2px;margin:-1px 0 0 -6px;background:currentColor;border-radius:1px;transition:transform .2s}
+summary .ic::after{transform:rotate(90deg)}
+details[open] summary .ic::after{transform:rotate(0)}
+details[open] summary{background:var(--accent-soft)}
+.ans{padding:14px 18px 18px;display:flex;flex-direction:column;gap:10px}
+.ans ul{margin:0;padding-left:1.2em;display:flex;flex-direction:column;gap:6px}
+.ans b{font-weight:600}
+.card{background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:24px;display:flex;flex-direction:column;gap:16px}
+.field{display:flex;flex-direction:column;gap:6px}
+label{font-weight:600}
+input[type=text]{width:100%;font:inherit;color:var(--fg);background:var(--bg);border:1.5px solid var(--line);border-radius:8px;padding:12px 14px}
+input[type=text]:focus-visible{outline:3px solid var(--accent);outline-offset:2px}
+input[aria-invalid="true"]{border-color:var(--bad)}
+.btn.solid{background:var(--accent);color:var(--accent-fg);padding:12px 22px;font-size:1rem;align-self:flex-start}
+.btn.solid:hover{background:var(--accent)}
+.btn:disabled{opacity:.5;cursor:not-allowed}
+.err{color:var(--bad);font-weight:600}
+table{width:100%;border-collapse:collapse;font-size:.95rem;font-variant-numeric:tabular-nums}
+th,td{text-align:left;padding:10px 14px;border-top:1px solid var(--line);white-space:nowrap}
+th{border-top:0;color:var(--muted);font-size:.78rem;letter-spacing:.08em;text-transform:uppercase}
+.tablewrap{overflow-x:auto;border:1px solid var(--line);border-radius:10px;background:var(--surface)}
+.lista{position:fixed;right:max(16px,env(safe-area-inset-right,0px));bottom:max(16px,env(safe-area-inset-bottom,0px));z-index:20;display:flex;flex-direction:column;align-items:flex-end;gap:8px;max-width:calc(100vw - 32px)}
+.lista-btn{font:inherit;font-weight:600;font-size:.95rem;background:var(--accent);color:var(--accent-fg);border:0;border-radius:999px;padding:10px 16px;cursor:pointer;box-shadow:0 2px 10px rgba(0,0,0,.25)}
+.lista-btn:focus-visible{outline:3px solid var(--accent);outline-offset:3px}
+.lista-panel{width:min(320px,calc(100vw - 32px));max-height:50vh;overflow:auto;background:var(--surface);border:1px solid var(--line);border-radius:10px;box-shadow:0 6px 24px rgba(0,0,0,.25);padding:12px 14px}
+.lista-panel h2{font-size:1rem;color:var(--fg);margin-bottom:8px}
+.lista-panel ol{margin:0;padding-left:1.4em;display:flex;flex-direction:column;gap:4px;font-size:.95rem}
+.lista-panel .vacio{color:var(--muted);font-size:.95rem}
+@media(prefers-reduced-motion:reduce){summary .ic::before,summary .ic::after{transition:none}}
+</style>
+</head>
+<body>
+
+
+<main id="gate">
+  <header class="head">
+    <span class="eyebrow">Trabajo de Geografía · Minería no metalífera</span>
+    <h1>Salinas Grandes, Jujuy</h1>
+    <p class="muted">Antes de entrar, registrate con tu nombre y apellido. Los dos son obligatorios.</p>
+  </header>
+  <form id="reg" class="card" novalidate>
+    <div class="field"><label for="nombre">Nombre</label><input type="text" id="nombre" autocomplete="given-name" maxlength="60"></div>
+    <div class="field"><label for="apellido">Apellido</label><input type="text" id="apellido" autocomplete="family-name" maxlength="60"></div>
+    <p class="err" id="err" role="alert" hidden></p>
+    <button class="btn solid" id="entrar" type="submit">Entrar</button>
+  </form>
+</main>
+
+
+
+<main id="contenido" hidden>
+  <header class="head">
+    <span class="eyebrow">Trabajo de Geografía · Minería no metalífera</span>
+    <h1>Salinas Grandes, Jujuy: preguntas y respuestas</h1>
+    <p class="muted" id="hola"></p>
+    <p class="muted">Hacé clic en una pregunta para ver su respuesta. Están ordenadas por tema.</p>
+    <div class="tools">
+      <button class="btn" id="abrir" type="button">Abrir todas</button>
+      <button class="btn" id="cerrar" type="button">Cerrar todas</button>
+      <button class="btn" id="salir" type="button">No soy yo</button>
+    </div>
+  </header>
+
+  <section>
+    <h2>1. Ubicación geográfica</h2>
+    <div class="list">
+      <details><summary><span class="t">¿Dónde se encuentra Salinas Grandes?</span><span class="ic"></span></summary>
+        <div class="ans"><p>En el noroeste de Argentina, en la región de la Puna, principalmente entre las provincias de Jujuy y Salta. Es una extensa depresión de altura, con clima árido, pocas precipitaciones y gran amplitud térmica.</p></div></details>
+      <details><summary><span class="t">¿A qué altura está?</span><span class="ic"></span></summary>
+        <div class="ans"><p>A unos 3.400 metros sobre el nivel del mar.</p></div></details>
+      <details><summary><span class="t">¿Cómo se formó el paisaje de sal?</span><span class="ic"></span></summary>
+        <div class="ans"><p>Es una gran superficie de sal que se origina por la evaporación del agua acumulada en la cuenca.</p></div></details>
+      <details><summary><span class="t">¿Está registrado como yacimiento?</span><span class="ic"></span></summary>
+        <div class="ans"><p>Sí. El yacimiento de sal de Salinas Grandes, en Jujuy, figura en la base de datos del Servicio Geológico Minero Argentino (SEGEMAR) como un depósito productor de sal.</p></div></details>
+    </div>
+  </section>
+
+  <section>
+    <h2>2. Tipos de recursos explotados</h2>
+    <div class="list">
+      <details><summary><span class="t">¿Qué recurso se explota principalmente?</span><span class="ic"></span></summary>
+        <div class="ans"><p>La sal común o cloruro de sodio (NaCl).</p></div></details>
+      <details><summary><span class="t">¿Por qué la sal es un mineral no metalífero?</span><span class="ic"></span></summary>
+        <div class="ans"><p>Porque no se utiliza para obtener metales.</p></div></details>
+      <details><summary><span class="t">¿Para qué se usa la sal?</span><span class="ic"></span></summary>
+        <div class="ans"><ul>
+          <li><b>Alimentación:</b> sal de mesa y conservación de alimentos.</li>
+          <li><b>Industria química:</b> fabricación de cloro y soda cáustica.</li>
+          <li><b>Industria alimentaria:</b> elaboración de productos procesados.</li>
+          <li><b>Ganadería:</b> suplementos minerales para animales.</li>
+          <li><b>Industria y mantenimiento:</b> procesos industriales y tratamiento de agua.</li>
+        </ul></div></details>
+      <details><summary><span class="t">¿Hay otros recursos en los salares de la región?</span><span class="ic"></span></summary>
+        <div class="ans"><p>Sí, sales de potasio y salmueras que pueden contener litio. Pero este trabajo trata la extracción de sal, no la explotación de litio.</p></div></details>
+    </div>
+  </section>
+
+  <section>
+    <h2>3. Modos de refinamiento o procesamiento</h2>
+    <div class="list">
+      <details><summary><span class="t">¿Cómo se obtiene la sal?</span><span class="ic"></span></summary>
+        <div class="ans"><p>Se recolectan las capas salinas que quedan en la superficie del salar. Después puede pasar por distintas etapas para mejorar su calidad y prepararla para la venta.</p></div></details>
+      <details><summary><span class="t">¿Cuáles son las etapas del procesamiento?</span><span class="ic"></span></summary>
+        <div class="ans"><ul>
+          <li><b>A. Extracción:</b> se recoge la sal de la superficie con herramientas manuales o maquinaria, según el tipo de explotación.</li>
+          <li><b>B. Limpieza y lavado:</b> se eliminan restos de tierra y otras impurezas.</li>
+          <li><b>C. Secado y molienda:</b> se reduce la humedad y se tritura la sal para obtener sal fina, entrefina o gruesa.</li>
+          <li><b>D. Refinamiento y envasado:</b> se hacen controles de calidad, se agrega yodo a la sal para consumo humano y se envasa o se prepara a granel.</li>
+        </ul></div></details>
+    </div>
+  </section>
+
+  <section>
+    <h2>4. Transporte</h2>
+    <div class="list">
+      <details><summary><span class="t">¿Cómo se transporta la sal?</span><span class="ic"></span></summary>
+        <div class="ans"><p>Se traslada desde el salar a las plantas de procesamiento o almacenamiento, generalmente en camiones. Luego se distribuye a comercios y fábricas. Para llegar a otras provincias se usa principalmente el transporte por carretera, y en algunos circuitos también el ferrocarril.</p></div></details>
+      <details><summary><span class="t">¿Qué problemas genera el transporte?</span><span class="ic"></span></summary>
+        <div class="ans"><p>Genera costos económicos y consumo de combustibles. Por eso conviene organizar los recorridos para reducir gastos y contaminación.</p></div></details>
+    </div>
+  </section>
+
+  <section>
+    <h2>5. Utilización a futuro</h2>
+    <div class="list">
+      <details><summary><span class="t">¿Va a seguir siendo importante la sal?</span><span class="ic"></span></summary>
+        <div class="ans"><p>Sí, porque tiene aplicaciones en la alimentación y en muchas industrias.</p></div></details>
+      <details><summary><span class="t">¿Cómo se podría mejorar su aprovechamiento?</span><span class="ic"></span></summary>
+        <div class="ans"><p>Con tecnologías que reduzcan el consumo de energía, permitan recuperar materiales y disminuyan los residuos. También invirtiendo en plantas de procesamiento cerca de las zonas de extracción, si es viable ambiental y económicamente. Eso daría más trabajo local y permitiría vender productos con mayor valor agregado, en lugar de solo la materia prima.</p></div></details>
+      <details><summary><span class="t">¿Es un recurso renovable?</span><span class="ic"></span></summary>
+        <div class="ans"><p>No. Es un recurso mineral natural que no se regenera a la velocidad con la que se consume. Su aprovechamiento puede durar si se administra bien, pero no debe considerarse una fuente renovable.</p></div></details>
+    </div>
+  </section>
+
+  <section>
+    <h2>6. Distribución en los mercados</h2>
+    <div class="list">
+      <details><summary><span class="t">¿Cómo se distribuye en el mercado nacional?</span><span class="ic"></span></summary>
+        <div class="ans"><p>Se comercializa en las provincias argentinas para abastecer supermercados, comercios, industrias alimentarias, establecimientos ganaderos y empresas químicas. Una parte se vende envasada para consumo doméstico y otra a granel para uso industrial.</p></div></details>
+      <details><summary><span class="t">¿Y en el mercado internacional?</span><span class="ic"></span></summary>
+        <div class="ans"><p>La sal argentina puede formar parte del comercio exterior, según su calidad, el volumen producido, los costos logísticos y la demanda de otros países. Para exportarla debe cumplir los requisitos comerciales y sanitarios del país de destino.</p></div></details>
+      <details><summary><span class="t">¿Toda la sal de Salinas Grandes se exporta?</span><span class="ic"></span></summary>
+        <div class="ans"><p>No. No existe un único circuito de distribución: la comercialización depende de cada productor y de los acuerdos que haga con sus compradores.</p></div></details>
+    </div>
+  </section>
+
+  <section>
+    <h2>7. Consecuencias ambientales</h2>
+    <div class="list">
+      <details><summary><span class="t">¿Qué efectos ambientales puede tener la extracción de sal?</span><span class="ic"></span></summary>
+        <div class="ans"><ul>
+          <li><b>Alteración del paisaje:</b> se modifica la superficie del salar y pueden quedar sectores removidos.</li>
+          <li><b>Generación de polvo:</b> la circulación de vehículos y el movimiento de la sal producen partículas que afectan el aire.</li>
+          <li><b>Consumo de energía:</b> máquinas, camiones y procesos industriales usan energía y pueden emitir contaminantes.</li>
+          <li><b>Residuos del procesamiento:</b> el lavado y el refinamiento producen residuos que deben tratarse bien.</li>
+          <li><b>Afectación de actividades locales:</b> una explotación mal planificada puede interferir con el turismo, las actividades tradicionales y el trabajo de las comunidades que viven de la sal.</li>
+        </ul></div></details>
+      <details><summary><span class="t">¿Por qué hay que cuidar especialmente este lugar?</span><span class="ic"></span></summary>
+        <div class="ans"><p>Porque Salinas Grandes es un ecosistema de altura con condiciones ambientales particulares. Hay que prestar atención al agua y a la biodiversidad, sobre todo si se consideran otros proyectos mineros de la región. Los estudios sobre la Puna destacan la importancia de proteger sus humedales y recursos hídricos.</p></div></details>
+    </div>
+  </section>
+
+  <section>
+    <h2>8. Reemplazo para una utilización futura renovable (pensamiento propio)</h2>
+    <div class="list">
+      <details><summary><span class="t">¿Se puede reemplazar la sal por un recurso renovable?</span><span class="ic"></span></summary>
+        <div class="ans"><p>En mi opinión, no por completo, porque la sal cumple funciones que otros materiales no pueden realizar de la misma manera. Sí se puede reducir el consumo innecesario y buscar alternativas más sustentables para su extracción y procesamiento.</p></div></details>
+      <details><summary><span class="t">¿Qué se podría hacer para que sea más sustentable?</span><span class="ic"></span></summary>
+        <div class="ans"><ul>
+          <li>Usar energía solar para secar la sal, ya que Jujuy tiene mucha radiación solar.</li>
+          <li>Usar electricidad de fuentes renovables.</li>
+          <li>Mejorar el mantenimiento de las máquinas y reducir el combustible del transporte.</li>
+          <li>Recuperar y reutilizar el agua de los procesos industriales cuando lo permitan las condiciones técnicas y sanitarias.</li>
+          <li>Fijar límites de extracción y controles ambientales para no perjudicar a las comunidades ni al paisaje.</li>
+        </ul></div></details>
+      <details><summary><span class="t">¿Cuál es la conclusión?</span><span class="ic"></span></summary>
+        <div class="ans"><p>No se trata de dejar de usar todos los minerales, sino de aprovecharlos responsablemente. La sal es necesaria para muchas actividades, pero su extracción no debe hacerse sin considerar las consecuencias ambientales. Combinando energías renovables, tecnologías más eficientes y controles adecuados, se puede mantener la actividad económica y cuidar los recursos para las próximas generaciones.</p></div></details>
+    </div>
+  </section>
+</main>
+
+<aside class="lista" aria-label="Personas registradas">
+  <div class="lista-panel" id="lista-panel" hidden>
+    <h2>Personas registradas</h2>
+    <ol id="lista-ol"></ol>
+    <p class="vacio" id="lista-vacio">Todavía no se registró nadie.</p>
+  </div>
+  <button class="lista-btn" id="lista-btn" type="button" aria-expanded="false" aria-controls="lista-panel">Registrados (0)</button>
+</aside>
+
+<script>
+/* PARA QUE TODOS VEAN LA MISMA LISTA:
+   pegá entre las comillas la dirección de tu base de datos de Firebase, sin la barra final.
+   Ejemplo: "https://mi-proyecto-default-rtdb.firebaseio.com"
+   Si la dejás vacía, la lista muestra solo a quienes se registraron en este navegador. */
+var BASE = "https://salina-grande-2-default-rtdb.firebaseio.com";
+var REGISTRO_URL = BASE ? BASE + "/registros.json" : "";
+var LISTA_URL = REGISTRO_URL;
+
+var $ = function(id){ return document.getElementById(id); };
+var KEY = "salinas_registro", LKEY = "salinas_lista";
+var RX = /^[\p{L}][\p{L}\s'.\-]*$/u;
+function show(v){ ["gate","contenido"].forEach(function(k){ $(k).hidden = (k !== v); }); window.scrollTo(0,0); }
+function limpiar(s){ return s.replace(/\s+/g," ").trim(); }
+function setErr(msg){ var e = $("err"); e.textContent = msg; e.hidden = !msg; }
+function entrar(n,a){ $("hola").textContent = "Registrado como " + n + " " + a + "."; show("contenido"); }
+
+$("reg").addEventListener("submit", async function(ev){
+  ev.preventDefault();
+  var n = limpiar($("nombre").value), a = limpiar($("apellido").value);
+  var badN = n.length < 2 || !RX.test(n), badA = a.length < 2 || !RX.test(a);
+  $("nombre").setAttribute("aria-invalid", String(badN));
+  $("apellido").setAttribute("aria-invalid", String(badA));
+  if(!n || !a){ setErr("Completá el nombre y el apellido para entrar."); return; }
+  if(badN || badA){ setErr("Escribí un nombre y un apellido válidos, solo con letras."); return; }
+  setErr(""); $("entrar").disabled = true;
+  if(REGISTRO_URL){
+    try{
+      var r = await fetch(REGISTRO_URL, {method:"POST",
+        body: JSON.stringify({nombre:n, apellido:a, fecha:new Date().toISOString()})});
+      if(!r.ok) throw new Error("código " + r.status);
+    }catch(e){
+      setErr("No se pudo guardar tu registro (" + (e && e.message ? e.message : "sin conexión") + "). Revisá tu conexión y probá de nuevo.");
+      $("entrar").disabled = false; return;
+    }
+  }
+  try{ localStorage.setItem(KEY, JSON.stringify({n:n,a:a})); }catch(e){}
+  agregarLocal({nombre:n, apellido:a, fecha:new Date().toISOString()});
+  $("entrar").disabled = false;
+  entrar(n,a);
+});
+
+$("salir").onclick = function(){ try{ localStorage.removeItem(KEY); }catch(e){} $("nombre").value=""; $("apellido").value=""; show("gate"); };
+
+var lista = [];
+function leerLocal(){ try{ var l = JSON.parse(localStorage.getItem(LKEY)); return Array.isArray(l) ? l : []; }catch(e){ return []; } }
+function agregarLocal(r){
+  var l = leerLocal();
+  var igual = l.some(function(x){ return x.nombre.toLowerCase() === r.nombre.toLowerCase() && x.apellido.toLowerCase() === r.apellido.toLowerCase(); });
+  if(!igual){ l.push(r); try{ localStorage.setItem(LKEY, JSON.stringify(l)); }catch(e){} }
+  if(!LISTA_URL){ lista = l; pintarLista(); }
+}
+function pintarLista(){
+  var ol = $("lista-ol"); ol.textContent = "";
+  lista.forEach(function(x){ var li = document.createElement("li"); li.textContent = String(x.apellido || "") + ", " + String(x.nombre || ""); ol.appendChild(li); });
+  $("lista-vacio").hidden = lista.length > 0;
+  $("lista-btn").textContent = "Registrados (" + lista.length + ")";
+}
+$("lista-btn").onclick = function(){
+  var p = $("lista-panel"); p.hidden = !p.hidden;
+  $("lista-btn").setAttribute("aria-expanded", String(!p.hidden));
+};
+(async function(){
+  if(LISTA_URL){
+    try{
+      var r = await fetch(LISTA_URL, {headers:{"Accept":"application/json"}});
+      var j = await r.json();
+      lista = (Array.isArray(j) ? j : Object.values(j || {})).filter(function(x){ return x && x.nombre && x.apellido; });
+    }catch(e){ lista = leerLocal(); }
+  } else { lista = leerLocal(); }
+  pintarLista();
+})();
+
+(function(){
+  var saved = null; try{ saved = JSON.parse(localStorage.getItem(KEY)); }catch(e){}
+  if(saved && saved.n && saved.a) entrar(saved.n, saved.a);
+})();
+
+var ds = function(){ return document.querySelectorAll("details"); };
+$("abrir").onclick = function(){ ds().forEach(function(d){ d.open = true; }); };
+$("cerrar").onclick = function(){ ds().forEach(function(d){ d.open = false; }); };
+</script>
+
+
+</body>
+</html>
