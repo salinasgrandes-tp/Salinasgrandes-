@@ -67,13 +67,6 @@ table{width:100%;border-collapse:collapse;font-size:.95rem;font-variant-numeric:
 th,td{text-align:left;padding:10px 14px;border-top:1px solid var(--line);white-space:nowrap}
 th{border-top:0;color:var(--muted);font-size:.78rem;letter-spacing:.08em;text-transform:uppercase}
 .tablewrap{overflow-x:auto;border:1px solid var(--line);border-radius:10px;background:var(--surface)}
-.lista{position:fixed;right:max(16px,env(safe-area-inset-right,0px));bottom:max(16px,env(safe-area-inset-bottom,0px));z-index:20;display:flex;flex-direction:column;align-items:flex-end;gap:8px;max-width:calc(100vw - 32px)}
-.lista-btn{font:inherit;font-weight:600;font-size:.95rem;background:var(--accent);color:var(--accent-fg);border:0;border-radius:999px;padding:10px 16px;cursor:pointer;box-shadow:0 2px 10px rgba(0,0,0,.25)}
-.lista-btn:focus-visible{outline:3px solid var(--accent);outline-offset:3px}
-.lista-panel{width:min(320px,calc(100vw - 32px));max-height:50vh;overflow:auto;background:var(--surface);border:1px solid var(--line);border-radius:10px;box-shadow:0 6px 24px rgba(0,0,0,.25);padding:12px 14px}
-.lista-panel h2{font-size:1rem;color:var(--fg);margin-bottom:8px}
-.lista-panel ol{margin:0;padding-left:1.4em;display:flex;flex-direction:column;gap:4px;font-size:.95rem}
-.lista-panel .vacio{color:var(--muted);font-size:.95rem}
 @media(prefers-reduced-motion:reduce){summary .ic::before,summary .ic::after{transition:none}}
 </style>
 </head>
@@ -105,7 +98,6 @@ th{border-top:0;color:var(--muted);font-size:.78rem;letter-spacing:.08em;text-tr
     <div class="tools">
       <button class="btn" id="abrir" type="button">Abrir todas</button>
       <button class="btn" id="cerrar" type="button">Cerrar todas</button>
-      <button class="btn" id="salir" type="button">No soy yo</button>
     </div>
   </header>
 
@@ -227,31 +219,22 @@ th{border-top:0;color:var(--muted);font-size:.78rem;letter-spacing:.08em;text-tr
   </section>
 </main>
 
-<aside class="lista" aria-label="Personas registradas">
-  <div class="lista-panel" id="lista-panel" hidden>
-    <h2>Personas registradas</h2>
-    <ol id="lista-ol"></ol>
-    <p class="vacio" id="lista-vacio">Todavía no se registró nadie.</p>
-  </div>
-  <button class="lista-btn" id="lista-btn" type="button" aria-expanded="false" aria-controls="lista-panel">Registrados (0)</button>
-</aside>
 
 <script>
-/* PARA QUE TODOS VEAN LA MISMA LISTA:
-   pegá entre las comillas la dirección de tu base de datos de Firebase, sin la barra final.
-   Ejemplo: "https://mi-proyecto-default-rtdb.firebaseio.com"
-   Si la dejás vacía, la lista muestra solo a quienes se registraron en este navegador. */
 var BASE = "https://salina-grande-2-default-rtdb.firebaseio.com";
-var REGISTRO_URL = BASE ? BASE + "/registros.json" : "";
-var LISTA_URL = REGISTRO_URL;
 
 var $ = function(id){ return document.getElementById(id); };
-var KEY = "salinas_registro", LKEY = "salinas_lista";
+var KEY = "salinas_registro";
 var RX = /^[\p{L}][\p{L}\s'.\-]*$/u;
 function show(v){ ["gate","contenido"].forEach(function(k){ $(k).hidden = (k !== v); }); window.scrollTo(0,0); }
 function limpiar(s){ return s.replace(/\s+/g," ").trim(); }
 function setErr(msg){ var e = $("err"); e.textContent = msg; e.hidden = !msg; }
 function entrar(n,a){ $("hola").textContent = "Registrado como " + n + " " + a + "."; show("contenido"); }
+/* Una persona = una sola entrada: la clave sale del apellido y el nombre sin tildes ni mayúsculas. */
+function clave(n,a){
+  return (a + " " + n).normalize("NFD").replace(/[\u0300-\u036f]/g,"").toLowerCase()
+    .replace(/[^a-z0-9]+/g,"_").replace(/^_+|_+$/g,"");
+}
 
 $("reg").addEventListener("submit", async function(ev){
   ev.preventDefault();
@@ -262,9 +245,9 @@ $("reg").addEventListener("submit", async function(ev){
   if(!n || !a){ setErr("Completá el nombre y el apellido para entrar."); return; }
   if(badN || badA){ setErr("Escribí un nombre y un apellido válidos, solo con letras."); return; }
   setErr(""); $("entrar").disabled = true;
-  if(REGISTRO_URL){
+  if(BASE){
     try{
-      var r = await fetch(REGISTRO_URL, {method:"POST",
+      var r = await fetch(BASE + "/registros/" + clave(n,a) + ".json", {method:"PUT",
         body: JSON.stringify({nombre:n, apellido:a, fecha:new Date().toISOString()})});
       if(!r.ok) throw new Error("código " + r.status);
     }catch(e){
@@ -273,41 +256,9 @@ $("reg").addEventListener("submit", async function(ev){
     }
   }
   try{ localStorage.setItem(KEY, JSON.stringify({n:n,a:a})); }catch(e){}
-  agregarLocal({nombre:n, apellido:a, fecha:new Date().toISOString()});
   $("entrar").disabled = false;
   entrar(n,a);
 });
-
-$("salir").onclick = function(){ try{ localStorage.removeItem(KEY); }catch(e){} $("nombre").value=""; $("apellido").value=""; show("gate"); };
-
-var lista = [];
-function leerLocal(){ try{ var l = JSON.parse(localStorage.getItem(LKEY)); return Array.isArray(l) ? l : []; }catch(e){ return []; } }
-function agregarLocal(r){
-  var l = leerLocal();
-  var igual = l.some(function(x){ return x.nombre.toLowerCase() === r.nombre.toLowerCase() && x.apellido.toLowerCase() === r.apellido.toLowerCase(); });
-  if(!igual){ l.push(r); try{ localStorage.setItem(LKEY, JSON.stringify(l)); }catch(e){} }
-  if(!LISTA_URL){ lista = l; pintarLista(); }
-}
-function pintarLista(){
-  var ol = $("lista-ol"); ol.textContent = "";
-  lista.forEach(function(x){ var li = document.createElement("li"); li.textContent = String(x.apellido || "") + ", " + String(x.nombre || ""); ol.appendChild(li); });
-  $("lista-vacio").hidden = lista.length > 0;
-  $("lista-btn").textContent = "Registrados (" + lista.length + ")";
-}
-$("lista-btn").onclick = function(){
-  var p = $("lista-panel"); p.hidden = !p.hidden;
-  $("lista-btn").setAttribute("aria-expanded", String(!p.hidden));
-};
-(async function(){
-  if(LISTA_URL){
-    try{
-      var r = await fetch(LISTA_URL, {headers:{"Accept":"application/json"}});
-      var j = await r.json();
-      lista = (Array.isArray(j) ? j : Object.values(j || {})).filter(function(x){ return x && x.nombre && x.apellido; });
-    }catch(e){ lista = leerLocal(); }
-  } else { lista = leerLocal(); }
-  pintarLista();
-})();
 
 (function(){
   var saved = null; try{ saved = JSON.parse(localStorage.getItem(KEY)); }catch(e){}
